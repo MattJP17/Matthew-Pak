@@ -58,23 +58,6 @@ body {
   overflow-y: auto;
 }
 
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-}
-
-.card {
-  background: #1f2937;
-  padding: 15px;
-  border-radius: 8px;
-}
-
-.card h4 {
-  margin: 0 0 10px 0;
-  color: #9ca3af;
-}
-
 .chart-container {
   margin-top: 20px;
   background: #1f2937;
@@ -128,13 +111,6 @@ th {
 
 <div class="main">
 
-<div class="card-grid">
-  <div class="card"><h4>Beta</h4><p id="beta">-</p></div>
-  <div class="card"><h4>Alpha</h4><p id="alpha">-</p></div>
-  <div class="card"><h4>Volatility</h4><p id="vol">-</p></div>
-  <div class="card"><h4>Sharpe Ratio</h4><p id="sharpe">-</p></div>
-</div>
-
 <div class="chart-container">
   <canvas id="returnsChart"></canvas>
 </div>
@@ -158,26 +134,15 @@ function randomData(n) {
 function calculate() {
   let P = parseFloat(document.getElementById("amount").value);
   let annualRate = parseFloat(document.getElementById("rate").value);
+  let years = parseInt(document.getElementById("years").value) || 30;
 
   let r = annualRate / 100 / 12;
-  let years = parseInt(document.getElementById("years").value) || 30;
-  let n = years * 12; // dynamic months
+  let n = years * 12;
 
   let M = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 
-  // Finance metrics (mock for now)
+  // Chart (still simulated for now)
   let returns = randomData(50);
-  let avg = returns.reduce((a,b)=>a+b,0)/returns.length;
-  let variance = returns.reduce((a,b)=>a + Math.pow(b-avg,2),0)/returns.length;
-  let std = Math.sqrt(variance);
-  let sharpe = avg / std;
-
-  document.getElementById("beta").innerText = (Math.random()*1.5).toFixed(2);
-  document.getElementById("alpha").innerText = (Math.random()*0.1).toFixed(3);
-  document.getElementById("vol").innerText = std.toFixed(3);
-  document.getElementById("sharpe").innerText = sharpe.toFixed(2);
-
-  // Chart
   let labels = returns.map((_,i)=>i+1);
 
   new Chart(document.getElementById("returnsChart"), {
@@ -191,7 +156,7 @@ function calculate() {
     }
   });
 
-  // Amortization table (full period based on years input)
+  // Amortization table
   let balance = P;
 
   let tableHTML = `
