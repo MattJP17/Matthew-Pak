@@ -1,88 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Financial Analysis Dashboard</title>
+<meta charset="UTF-8">
+<title>Financial Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background-color: #f4f6f9;
-      color: #333;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b0f1a;
+  color: #e6e6e6;
+}
 
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-    }
+.header {
+  background: #111827;
+  padding: 15px;
+  font-size: 22px;
+  font-weight: bold;
+}
 
-    h2 {
-      background-color: #2c3e50;
-      color: white;
-      padding: 10px;
-      border-radius: 5px;
-    }
+.container {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  height: 100vh;
+}
 
-    ul {
-      background: white;
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+.sidebar {
+  background: #111827;
+  padding: 20px;
+}
 
-    li {
-      margin: 8px 0;
-    }
+.sidebar h3 {
+  color: #9ca3af;
+}
 
-    .section {
-      margin-bottom: 30px;
-    }
-  </style>
+.sidebar input {
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+  background: #1f2937;
+  border: none;
+  color: white;
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 10px;
+  background: #2563eb;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.main {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.card {
+  background: #1f2937;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.card h4 {
+  margin: 0 0 10px 0;
+  color: #9ca3af;
+}
+
+.chart-container {
+  margin-top: 20px;
+  background: #1f2937;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+</style>
 </head>
 
 <body>
 
-<h1>📊 Financial Analysis Dashboard</h1>
+<div class="header">📊 Financial Dashboard</div>
 
-<div class="section">
-  <h2>Risk and Return Measures</h2>
-  <ul>
-    <li>Beta of a stock relative to the market over a specified period</li>
-    <li>Alpha from the CAPM or multi-factor models</li>
-    <li>Volatility (standard deviation of returns)</li>
-    <li>Correlation between two or more assets</li>
-  </ul>
+<div class="container">
+
+<div class="sidebar">
+  <h3>Inputs</h3>
+
+  <input type="number" id="amount" placeholder="Loan Amount">
+  <input type="number" id="rate" placeholder="Interest %">
+
+  <button onclick="calculate()">Run Analysis</button>
 </div>
 
-<div class="section">
-  <h2>Performance Measures</h2>
-  <ul>
-    <li>Holding-period returns</li>
-    <li>Annualized returns</li>
-    <li>Excess returns over a benchmark</li>
-    <li>Sharpe ratio or Treynor ratio</li>
-  </ul>
+<div class="main">
+
+<div class="card-grid">
+  <div class="card"><h4>Beta</h4><p id="beta">-</p></div>
+  <div class="card"><h4>Alpha</h4><p id="alpha">-</p></div>
+  <div class="card"><h4>Volatility</h4><p id="vol">-</p></div>
+  <div class="card"><h4>Sharpe Ratio</h4><p id="sharpe">-</p></div>
 </div>
 
-<div class="section">
-  <h2>Market and Firm Characteristics</h2>
-  <ul>
-    <li>Market capitalization</li>
-    <li>Price-to-earnings (P/E) ratio</li>
-    <li>Dividend yield</li>
-    <li>Book-to-market ratio</li>
-  </ul>
+<div class="chart-container">
+  <canvas id="returnsChart"></canvas>
 </div>
 
-<div class="section">
-  <h2>Time-Series or Cross-Sectional Analysis</h2>
-  <ul>
-    <li>Returns for a stock, index, or portfolio over a specified date range</li>
-    <li>Comparison of returns across multiple stocks or sectors</li>
-    <li>Simple portfolio returns based on selected asset weights</li>
-  </ul>
 </div>
+</div>
+
+<script>
+function randomData(n) {
+  let data = [];
+  for (let i = 0; i < n; i++) {
+    data.push((Math.random() - 0.5) * 0.1);
+  }
+  return data;
+}
+
+function calculate() {
+  let returns = randomData(50);
+
+  let avg = returns.reduce((a,b)=>a+b,0)/returns.length;
+  let variance = returns.reduce((a,b)=>a + Math.pow(b-avg,2),0)/returns.length;
+  let std = Math.sqrt(variance);
+
+  let sharpe = avg / std;
+
+  document.getElementById("beta").innerText = (Math.random()*1.5).toFixed(2);
+  document.getElementById("alpha").innerText = (Math.random()*0.1).toFixed(3);
+  document.getElementById("vol").innerText = std.toFixed(3);
+  document.getElementById("sharpe").innerText = sharpe.toFixed(2);
+
+  let labels = returns.map((_,i)=>i+1);
+
+  new Chart(document.getElementById("returnsChart"), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Returns',
+        data: returns
+      }]
+    }
+  });
+}
+</script>
 
 </body>
 </html>
