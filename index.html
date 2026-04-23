@@ -121,6 +121,7 @@ th {
 
   <input type="number" id="amount" placeholder="Loan Amount">
   <input type="number" id="rate" placeholder="Interest %">
+  <input type="number" id="years" placeholder="Years (e.g. 30)" value="30">
 
   <button onclick="calculate()">Run Analysis</button>
 </div>
@@ -159,7 +160,8 @@ function calculate() {
   let annualRate = parseFloat(document.getElementById("rate").value);
 
   let r = annualRate / 100 / 12;
-  let n = 360; // full 30 years
+  let years = parseInt(document.getElementById("years").value) || 30;
+  let n = years * 12; // dynamic months
 
   let M = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 
@@ -189,7 +191,7 @@ function calculate() {
     }
   });
 
-  // Amortization table (360 months)
+  // Amortization table (full period based on years input)
   let balance = P;
 
   let tableHTML = `
@@ -224,3 +226,4 @@ function calculate() {
 
 </body>
 </html>
+
