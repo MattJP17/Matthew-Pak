@@ -82,6 +82,31 @@ body {
   border-radius: 8px;
 }
 
+.table-container {
+  margin-top: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: #1f2937;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th, td {
+  border: 1px solid #374151;
+  padding: 6px;
+  text-align: center;
+}
+
+th {
+  background: #111827;
+}
+
 </style>
 </head>
 
@@ -113,6 +138,10 @@ body {
   <canvas id="returnsChart"></canvas>
 </div>
 
+<div class="table-container">
+  <table id="table"></table>
+</div>
+
 </div>
 </div>
 
@@ -126,12 +155,19 @@ function randomData(n) {
 }
 
 function calculate() {
-  let returns = randomData(50);
+  let P = parseFloat(document.getElementById("amount").value);
+  let annualRate = parseFloat(document.getElementById("rate").value);
 
+  let r = annualRate / 100 / 12;
+  let n = 360; // full 30 years
+
+  let M = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+  // Finance metrics (mock for now)
+  let returns = randomData(50);
   let avg = returns.reduce((a,b)=>a+b,0)/returns.length;
   let variance = returns.reduce((a,b)=>a + Math.pow(b-avg,2),0)/returns.length;
   let std = Math.sqrt(variance);
-
   let sharpe = avg / std;
 
   document.getElementById("beta").innerText = (Math.random()*1.5).toFixed(2);
@@ -139,6 +175,7 @@ function calculate() {
   document.getElementById("vol").innerText = std.toFixed(3);
   document.getElementById("sharpe").innerText = sharpe.toFixed(2);
 
+  // Chart
   let labels = returns.map((_,i)=>i+1);
 
   new Chart(document.getElementById("returnsChart"), {
@@ -151,6 +188,37 @@ function calculate() {
       }]
     }
   });
+
+  // Amortization table (360 months)
+  let balance = P;
+
+  let tableHTML = `
+    <tr>
+      <th>Month</th>
+      <th>Payment</th>
+      <th>Interest</th>
+      <th>Principal</th>
+      <th>Balance</th>
+    </tr>
+  `;
+
+  for (let i = 1; i <= n; i++) {
+    let interest = balance * r;
+    let principal = M - interest;
+    balance -= principal;
+
+    tableHTML += `
+      <tr>
+        <td>${i}</td>
+        <td>${M.toFixed(2)}</td>
+        <td>${interest.toFixed(2)}</td>
+        <td>${principal.toFixed(2)}</td>
+        <td>${balance.toFixed(2)}</td>
+      </tr>
+    `;
+  }
+
+  document.getElementById("table").innerHTML = tableHTML;
 }
 </script>
 
