@@ -123,8 +123,6 @@ th {
 </div>
 
 <script>
-let chartInstance = null;
-
 function randomData(n) {
   let data = [];
   for (let i = 0; i < n; i++) {
@@ -133,29 +131,24 @@ function randomData(n) {
   return data;
 }
 
+let chartInstance = null;
+
 function calculate() {
   let P = parseFloat(document.getElementById("amount").value);
   let annualRate = parseFloat(document.getElementById("rate").value);
   let years = parseInt(document.getElementById("years").value) || 30;
 
-  // Validate inputs
-  if (isNaN(P) || isNaN(annualRate)) {
-    alert("Please enter valid numbers");
+  if (!P || !annualRate) {
+    alert("Please enter loan amount and interest rate");
     return;
   }
 
   let r = annualRate / 100 / 12;
   let n = years * 12;
 
-  // Monthly payment
-  let M;
-  if (r === 0) {
-    M = P / n;
-  } else {
-    M = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-  }
+  let M = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 
-  // Build amortization + chart data
+  // Generate simple balance trend for chart
   let balance = P;
   let balances = [];
   let labels = [];
@@ -169,7 +162,7 @@ function calculate() {
     labels.push(i);
   }
 
-  // Reset chart properly
+  // Destroy old chart before creating new one
   if (chartInstance) {
     chartInstance.destroy();
   }
@@ -215,8 +208,43 @@ function calculate() {
   }
 
   document.getElementById("table").innerHTML = tableHTML;
+}]
+    }
+  });
+
+  // Amortization table
+  let balance = P;
+
+  let tableHTML = `
+    <tr>
+      <th>Month</th>
+      <th>Payment</th>
+      <th>Interest</th>
+      <th>Principal</th>
+      <th>Balance</th>
+    </tr>
+  `;
+
+  for (let i = 1; i <= n; i++) {
+    let interest = balance * r;
+    let principal = M - interest;
+    balance -= principal;
+
+    tableHTML += `
+      <tr>
+        <td>${i}</td>
+        <td>${M.toFixed(2)}</td>
+        <td>${interest.toFixed(2)}</td>
+        <td>${principal.toFixed(2)}</td>
+        <td>${balance.toFixed(2)}</td>
+      </tr>
+    `;
+  }
+
+  document.getElementById("table").innerHTML = tableHTML;
 }
 </script>
 
 </body>
 </html>
+
