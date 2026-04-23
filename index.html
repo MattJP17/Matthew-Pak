@@ -132,28 +132,84 @@ function randomData(n) {
   return data;
 }
 
+let chartInstance = null;
+
 function calculate() {
   let P = parseFloat(document.getElementById("amount").value);
   let annualRate = parseFloat(document.getElementById("rate").value);
   let years = parseInt(document.getElementById("years").value) || 30;
+
+  if (!P || !annualRate) {
+    alert("Please enter loan amount and interest rate");
+    return;
+  }
 
   let r = annualRate / 100 / 12;
   let n = years * 12;
 
   let M = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 
-  // Chart (still simulated for now)
-  let returns = randomData(50);
-  let labels = returns.map((_,i)=>i+1);
+  // Generate simple balance trend for chart
+  let balance = P;
+  let balances = [];
+  let labels = [];
 
-  new Chart(document.getElementById("returnsChart"), {
+  for (let i = 1; i <= n; i++) {
+    let interest = balance * r;
+    let principal = M - interest;
+    balance -= principal;
+
+    balances.push(balance);
+    labels.push(i);
+  }
+
+  // Destroy old chart before creating new one
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  chartInstance = new Chart(document.getElementById("returnsChart"), {
     type: 'line',
     data: {
       labels: labels,
       datasets: [{
-        label: 'Returns',
-        data: returns
+        label: 'Remaining Balance',
+        data: balances
       }]
+    }
+  });
+
+  // Amortization table
+  balance = P;
+
+  let tableHTML = `
+    <tr>
+      <th>Month</th>
+      <th>Payment</th>
+      <th>Interest</th>
+      <th>Principal</th>
+      <th>Balance</th>
+    </tr>
+  `;
+
+  for (let i = 1; i <= n; i++) {
+    let interest = balance * r;
+    let principal = M - interest;
+    balance -= principal;
+
+    tableHTML += `
+      <tr>
+        <td>${i}</td>
+        <td>${M.toFixed(2)}</td>
+        <td>${interest.toFixed(2)}</td>
+        <td>${principal.toFixed(2)}</td>
+        <td>${balance.toFixed(2)}</td>
+      </tr>
+    `;
+  }
+
+  document.getElementById("table").innerHTML = tableHTML;
+}]
     }
   });
 
@@ -192,7 +248,3 @@ function calculate() {
 
 </body>
 </html>
-
- 
-
-
